@@ -10,7 +10,12 @@ const app = express();
 
 // Middleware
 app.use(cors({
-    origin: [config.clientUrl, 'http://localhost:5173', 'http://localhost:3000'],
+    origin: [
+        config.clientUrl,
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://koko-assignment-pi.vercel.app'
+    ],
     credentials: true,
 }));
 app.use(express.json());
