@@ -35,8 +35,7 @@ Assignment-koko/
 │   │   ├── styles/        # CSS styles
 │   │   └── sdk.tsx        # SDK entry point
 │   └── package.json
-│
-└── demo/                   # Demo integration page
+│   └── demo              # Demo integration page
 ```
 
 ## 🚀 Setup Instructions
@@ -159,6 +158,3 @@ Pass context information:
 - No authentication for chatbot users
 - Single timezone for appointments
 
-
-
-# koko-assignment
