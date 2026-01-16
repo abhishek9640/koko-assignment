@@ -150,13 +150,20 @@ Pass context information:
 7. On confirm: appointment saved to MongoDB
 8. On cancel: booking state reset
 
-## 📋 Assumptions
+## 📋 Assumptions & Design Decisions
 
-- Google Gemini API key provided by user
-- MongoDB instance available (local or cloud)
-- Modern browsers (ES6+ support)
-- No authentication for chatbot users
-- Single timezone for appointments
+| Assumption | Reasoning |
+|------------|-----------|
+| **No User Authentication** | Chatbot is designed for public-facing websites where visitors should interact without login barriers. User context is optional and passed via SDK config. |
+| **Session-Based Conversations** | Each chat window gets a unique session ID. This allows anonymous users while still linking conversations to appointments. |
+| **Gemini API for AI** | Google Gemini offers generous free tier and excellent instruction-following for domain-restricted responses. |
+| **MongoDB Atlas** | Document-based storage is ideal for flexible chat messages and session data. Atlas provides free tier and easy cloud hosting. |
+| **Server-Side AI Calls** | API key security - Gemini calls are made server-side to avoid exposing the API key in client JavaScript. |
+| **Single Timezone** | Appointment times are stored in ISO format. Production would add timezone selection, but kept simple for MVP. |
+| **Basic Phone Validation** | 10-digit minimum validation covers most international formats without complex regex. |
+| **Date Picker over Text Input** | Added visual date picker to avoid date parsing issues - better UX than free-text input. |
+| **State Machine for Booking** | Ensures reliable multi-step data collection. Each step validates before proceeding to next. |
+| **IIFE SDK Bundle** | Self-executing function for zero-config embedding. Just add script tag and it works. |
 
 ## 🌐 Deployed Demo
 
