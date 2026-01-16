@@ -158,3 +158,21 @@ Pass context information:
 - No authentication for chatbot users
 - Single timezone for appointments
 
+## 🌐 Deployed Demo
+
+- **Frontend**: https://koko-assignment-pi.vercel.app/
+- **Backend API**: https://koko-assignment.onrender.com/
+- **Admin Dashboard**: https://koko-assignment-pi.vercel.app/admin/
+
+## 🔮 Future Improvements
+
+1. **Authentication**: Add user authentication for secure access
+2. **Appointment Reminders**: Email/SMS notifications for upcoming appointments
+3. **Multi-language Support**: Internationalization for wider reach
+4. **Voice Input**: Speech-to-text for hands-free interaction
+5. **Analytics Dashboard**: Track chatbot usage and popular topics
+6. **Appointment Calendar**: Visual calendar for slot selection
+7. **Rate Limiting**: Protect API from abuse
+8. **Caching**: Redis caching for frequently asked questions
+9. **WebSocket**: Real-time updates for typing indicators
+10. **Testing**: Expand test coverage with integration tests
