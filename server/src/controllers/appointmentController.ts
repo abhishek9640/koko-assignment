@@ -72,3 +72,21 @@ export const updateAppointmentStatus = async (req: Request, res: Response): Prom
         res.status(500).json({ error: 'Failed to update appointment' });
     }
 };
+
+export const deleteAppointment = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+
+        const appointment = await Appointment.findByIdAndDelete(id);
+
+        if (!appointment) {
+            res.status(404).json({ error: 'Appointment not found' });
+            return;
+        }
+
+        res.json({ message: 'Appointment deleted successfully' });
+    } catch (error) {
+        console.error('Delete appointment error:', error);
+        res.status(500).json({ error: 'Failed to delete appointment' });
+    }
+};

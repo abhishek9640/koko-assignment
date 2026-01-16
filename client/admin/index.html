@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Vet Appointments</title>
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #475569;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1 span {
+            font-size: 32px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-hover);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .table-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-hover);
+            font-weight: 500;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .status-confirmed {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .status-cancelled {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-confirm {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            opacity: 0.8;
+        }
+
+        .btn-cancel {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            opacity: 0.8;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            opacity: 0.8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .page-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: var(--bg-hover);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .refresh-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            th, td {
+                padding: 12px 8px;
+                font-size: 13px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span>🐾</span> Vet Appointments Admin</h1>
+            <button class="refresh-btn" onclick="loadAppointments()">
+                🔄 Refresh
+            </button>
+        </header>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Appointments</div>
+                <div class="stat-value" id="stat-total">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pending</div>
+                <div class="stat-value" id="stat-pending">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Confirmed</div>
+                <div class="stat-value" id="stat-confirmed">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cancelled</div>
+                <div class="stat-value" id="stat-cancelled">-</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-status="">All</button>
+            <button class="filter-btn" data-status="pending">Pending</button>
+            <button class="filter-btn" data-status="confirmed">Confirmed</button>
+            <button class="filter-btn" data-status="cancelled">Cancelled</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pet Owner</th>
+                        <th>Pet Name</th>
+                        <th>Phone</th>
+                        <th>Date/Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="appointments-table">
+                    <tr>
+                        <td colspan="6" class="loading">Loading appointments...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let currentPage = 1;
+        let currentStatus = '';
+
+        // Load appointments
+        async function loadAppointments() {
+            const tbody = document.getElementById('appointments-table');
+            tbody.innerHTML = '<tr><td colspan="6" class="loading">Loading...</td></tr>';
+
+            try {
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    limit: 10
+                });
+                if (currentStatus) {
+                    params.append('status', currentStatus);
+                }
+
+                const response = await fetch(`${API_BASE}/appointments?${params}`);
+                const data = await response.json();
+
+                if (data.appointments.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="empty">
+                                <div class="empty-icon">📭</div>
+                                <div>No appointments found</div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = data.appointments.map(apt => `
+                        <tr>
+                            <td>${apt.ownerName || '-'}</td>
+                            <td>${apt.petName || '-'}</td>
+                            <td>${apt.phoneNumber || '-'}</td>
+                            <td>${new Date(apt.preferredDateTime).toLocaleString()}</td>
+                            <td><span class="status-badge status-${apt.status}">${apt.status}</span></td>
+                            <td class="actions">
+                                ${apt.status === 'pending' ? `
+                                    <button class="action-btn btn-confirm" onclick="updateStatus('${apt._id}', 'confirmed')">Confirm</button>
+                                    <button class="action-btn btn-cancel" onclick="updateStatus('${apt._id}', 'cancelled')">Cancel</button>
+                                ` : ''}
+                                <button class="action-btn btn-delete" onclick="deleteAppointment('${apt._id}')">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                renderPagination(data.pagination);
+                loadStats();
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">Error loading appointments</td></tr>';
+            }
+        }
+
+        // Load stats
+        async function loadStats() {
+            try {
+                const [all, pending, confirmed, cancelled] = await Promise.all([
+                    fetch(`${API_BASE}/appointments?limit=1000`).then(r => r.json()),
+                    fetch(`${API_BASE}/appointments?status=pending&limit=1000`).then(r => r.json()),
+                    fetch(`${API_BASE}/appointments?status=confirmed&limit=1000`).then(r => r.json()),
+                    fetch(`${API_BASE}/appointments?status=cancelled&limit=1000`).then(r => r.json())
+                ]);
+
+                document.getElementById('stat-total').textContent = all.pagination.total;
+                document.getElementById('stat-pending').textContent = pending.pagination.total;
+                document.getElementById('stat-confirmed').textContent = confirmed.pagination.total;
+                document.getElementById('stat-cancelled').textContent = cancelled.pagination.total;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Update appointment status
+        async function updateStatus(id, status) {
+            try {
+                await fetch(`${API_BASE}/appointments/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                loadAppointments();
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Failed to update appointment');
+            }
+        }
+
+        // Delete appointment
+        async function deleteAppointment(id) {
+            if (!confirm('Are you sure you want to delete this appointment?')) return;
+
+            try {
+                await fetch(`${API_BASE}/appointments/${id}`, {
+                    method: 'DELETE'
+                });
+                loadAppointments();
+            } catch (error) {
+                console.error('Error deleting appointment:', error);
+                alert('Failed to delete appointment');
+            }
+        }
+
+        // Render pagination
+        function renderPagination(pagination) {
+            const container = document.getElementById('pagination');
+            const { page, totalPages } = pagination;
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            html += `<button class="page-btn" onclick="goToPage(${page - 1})" ${page === 1 ? 'disabled' : ''}>← Prev</button>`;
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
+                    html += `<button class="page-btn ${i === page ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                } else if (i === page - 2 || i === page + 2) {
+                    html += `<span style="color: var(--text-muted)">...</span>`;
+                }
+            }
+
+            html += `<button class="page-btn" onclick="goToPage(${page + 1})" ${page === totalPages ? 'disabled' : ''}>Next →</button>`;
+            container.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            loadAppointments();
+        }
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentStatus = btn.dataset.status;
+                currentPage = 1;
+                loadAppointments();
+            });
+        });
+
+        // Initial load
+        loadAppointments();
+    </script>
+</body>
+</html>
