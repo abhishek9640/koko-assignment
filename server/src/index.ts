@@ -32,8 +32,8 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Start server
-const PORT = config.port;
-app.listen(PORT, () => {
+const PORT = Number(config.port);
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📍 API available at http://localhost:${PORT}/api`);
 });
