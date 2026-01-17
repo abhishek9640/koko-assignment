@@ -1,8 +1,23 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { Session } from '../models/Session.js';
+import { Appointment } from '../models/Appointment.js';
 import { generateVetResponse, detectAppointmentIntent, ChatMessage } from '../services/geminiService.js';
 import { handleBookingFlow, isBookingInProgress } from '../services/appointmentService.js';
+
+// Helper to build appointment context for the AI
+function buildAppointmentContext(appointments: Array<{ ownerName: string; petName: string; preferredDateTime: Date; status: string }>): string {
+    if (appointments.length === 0) {
+        return '';
+    }
+
+    const appointmentList = appointments.map((apt, index) => {
+        const dateStr = new Date(apt.preferredDateTime).toLocaleString();
+        return `  ${index + 1}. Pet: ${apt.petName}, Owner: ${apt.ownerName}, Date/Time: ${dateStr}, Status: ${apt.status}`;
+    }).join('\n');
+
+    return `\n\n[SYSTEM CONTEXT - User's booked appointments for this session:\n${appointmentList}\nUse this information to answer questions about the user's appointments.]`;
+}
 
 interface SessionConfig {
     userId?: string;
@@ -85,13 +100,25 @@ export const sendMessage = async (req: Request, res: Response): Promise<void> =>
             const bookingResult = await handleBookingFlow(session, message);
             botResponse = bookingResult.message;
         } else {
-            // Regular AI response
+            // Regular AI response - fetch appointments for context
+            const appointments = await Appointment.find({ sessionId: session.sessionId })
+                .sort({ preferredDateTime: -1 })
+                .limit(10)
+                .lean();
+
+            const appointmentContext = buildAppointmentContext(appointments);
+
             const chatHistory: ChatMessage[] = session.messages.slice(0, -1).map(msg => ({
                 role: msg.role === 'user' ? 'user' : 'model',
                 parts: [{ text: msg.content }],
             }));
 
-            botResponse = await generateVetResponse(message, chatHistory);
+            // Include appointment context in the message to the AI
+            const enrichedMessage = appointmentContext
+                ? `${appointmentContext}\n\nUser question: ${message}`
+                : message;
+
+            botResponse = await generateVetResponse(enrichedMessage, chatHistory);
         }
 
         // Add bot response to history

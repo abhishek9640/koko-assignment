@@ -21,6 +21,8 @@ const VETERINARY_SYSTEM_PROMPT = `You are a friendly and knowledgeable veterinar
 5. Never provide specific medical diagnoses - always recommend consulting a veterinarian for serious concerns.
 6. Keep responses concise but informative.
 
+7. APPOINTMENT CONTEXT: If the user's message includes "[SYSTEM CONTEXT - User's booked appointments...]", use that information to answer questions about their appointments. You can tell them their appointment details, remind them of upcoming visits, or help with appointment-related queries.
+
 Remember: You cannot help with general knowledge questions, coding, math, or any non-veterinary topics.`;
 
 export interface ChatMessage {
@@ -59,7 +61,33 @@ export async function generateVetResponse(
 }
 
 export function detectAppointmentIntent(message: string): boolean {
-    const appointmentKeywords = [
+    const lowerMessage = message.toLowerCase();
+
+    // Phrases that indicate VIEWING existing appointments, NOT creating new ones
+    const viewingPhrases = [
+        'show my',
+        'what is my',
+        "what's my",
+        'when is my',
+        "when's my",
+        'my current',
+        'my existing',
+        'my upcoming',
+        'remind me',
+        'check my',
+        'view my',
+        'see my',
+        'list my',
+        'details of my',
+    ];
+
+    // If user is asking to VIEW appointments, don't trigger booking flow
+    if (viewingPhrases.some(phrase => lowerMessage.includes(phrase))) {
+        return false;
+    }
+
+    // Keywords that indicate BOOKING intent
+    const bookingKeywords = [
         'book',
         'appointment',
         'schedule',
@@ -74,6 +102,5 @@ export function detectAppointmentIntent(message: string): boolean {
         'vet visit',
     ];
 
-    const lowerMessage = message.toLowerCase();
-    return appointmentKeywords.some(keyword => lowerMessage.includes(keyword));
+    return bookingKeywords.some(keyword => lowerMessage.includes(keyword));
 }
